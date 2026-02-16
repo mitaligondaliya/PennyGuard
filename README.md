@@ -21,7 +21,7 @@ PennyGuard is a simple yet powerful personal finance app built using SwiftUI, Sw
 
 | Dashboard | Add Transaction | Transaction List |
 |:---------:|:----------------:|:----------------:|
-| <img src="PennyGuard/Resources/Assets/Screenshots/Dashboard.png" width="200" /> | <img src="PennyGuard/Resources/Assets/Screenshots/AddTransaction.png" width="200" /> | <img src="PennyGuard/Resources/Assets/Screenshots/TransactionList.png" width="200" /> |
+| <img src="PennyGaurd/Resources/Assets/Screenshots/Dashboard.png" width="200" /> | <img src="PennyGaurd/Resources/Assets/Screenshots/AddTransaction.png" width="200" /> | <img src="PennyGaurd/Resources/Assets/Screenshots/TransactionList.png" width="200" /> |
 
 
  ---
