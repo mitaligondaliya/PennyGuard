@@ -11,36 +11,75 @@ PennyGuard is a simple yet powerful personal finance app built using SwiftUI, Sw
 - 💾 Built using native **SwiftData** persistence
 - 🧩 Modular & testable architecture powered by **TCA**
 
+---
+
+## 📱 Demo
+
+🎥 Demo video: *Coming soon* 
+
 ## 📱 Screenshots
 
 | Dashboard | Add Transaction | Transaction List |
 |:---------:|:----------------:|:----------------:|
 | <img src="PennyGaurd/Resources/Assets/Screenshots/Dashboard.png" width="200" /> | <img src="PennyGaurd/Resources/Assets/Screenshots/AddTransaction.png" width="200" /> | <img src="PennyGaurd/Resources/Assets/Screenshots/TransactionList.png" width="200" /> |
 
-## 🚀 Architecture
 
-PennyGuard follows a **modular and scalable structure** using:
+ ---
 
-- ✅ **SwiftUI** for declarative UI
-- ✅ **SwiftData** for local persistence
-- ✅ **The Composable Architecture (TCA)** for predictable state management
-- ✅ **Dependency injection** for database handling
-- ✅ **Model-driven views** and testable reducers
+## 🏗 Architecture Overview
 
-## 🧱 Tech Stack
+PennyGuard follows **Clean Architecture principles** with a feature-first modular design.
 
-| Layer          | Framework / Tool          |
-|----------------|---------------------------|
-| UI             | SwiftUI                   |
-| State          | The Composable Architecture (TCA) |
-| Persistence    | SwiftData (`ModelContext`) |
-| Testing        | XCTest, TCA TestSupport   |
+### Core Architectural Decisions
 
+- **UI Layer:** SwiftUI  
+- **State Management:** The Composable Architecture (TCA)  
+- **Persistence Layer:** SwiftData (`ModelContext`)  
+- **Concurrency:** Structured concurrency using async/await  
+- **Dependency Injection:** Environment-based injection for testability  
+- **Testing:** Reducer-level unit tests using TCA TestSupport
+  
+---
+
+## 🧠 Why TCA?
+
+TCA ensures:
+
+- Predictable state transitions  
+- Explicit side-effect handling  
+- Highly testable business logic  
+- Scalable feature isolation  
+
+While TCA introduces additional boilerplate, it significantly improves long-term maintainability.
+
+---
+
+## 🛠 Tech Stack
+
+| Layer        | Technology |
+|--------------|------------|
+| UI           | SwiftUI |
+| State        | The Composable Architecture (TCA) |
+| Persistence  | SwiftData |
+| Concurrency  | async/await |
+| Testing      | XCTest, TCA TestSupport |
+| Platform     | iOS 17+ |
+
+---
 ## 🧪 Tests
 
 Includes unit tests for the reducer logic and business rules.
 
 To run tests:
 
-```bash
-Cmd + U (in Xcode)
+```
+⌘ + U
+```
+
+
+## ⚙️ Installation
+
+1. Clone the repository  
+2. Open `PennyGuard.xcodeproj`  
+3. Build & Run on iOS 17+  
+
