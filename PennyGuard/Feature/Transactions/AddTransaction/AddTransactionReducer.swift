@@ -100,7 +100,7 @@ struct AddTransactionReducer: Reducer {
             case let .categorySelected(category):
                 state.selectedCategory = category // Update selected category
                 return .none
-             case .saveTapped:
+            case .saveTapped:
                  // ✅ Validate input before attempting to save
                  // This is a safety net check - UI also disables save button, but we validate here too for:
                  // 1. Defense in depth - protects against unexpected UI state changes

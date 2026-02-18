@@ -19,7 +19,7 @@ struct AppReducer: Reducer {
     
     // MARK: - State
 
-    struct State {
+    struct State: Equatable {
         var selectedTab: Tab = .dashboard
         var transactionState = TransactionReducer.State()  // Shared state for both tabs
     }

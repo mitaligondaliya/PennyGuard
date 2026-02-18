@@ -16,10 +16,10 @@ struct AppTabView: View {
     let store: StoreOf<AppReducer>
 
     var body: some View {
-        WithViewStore(self.store, observe: \.selectedTab) { viewStore in
+        WithViewStore(self.store, observe: { $0 }) { viewStore in
             TabView(
                 selection: viewStore.binding(
-                    get: { $0 },
+                    get: \.selectedTab,
                     send: AppReducer.Action.selectTab
                 )
             ) {
@@ -48,6 +48,21 @@ struct AppTabView: View {
                     Label("Transactions", systemImage: "list.bullet")
                 }
                 .tag(AppReducer.Tab.transactions)
+            }
+            // MARK: - Centralized Sheet (at tab level to avoid duplicate bindings)
+            .sheet(
+                isPresented: viewStore.binding(
+                    get: \.transactionState.isPresentingSheet,
+                    send: { _ in AppReducer.Action.transactionState(.sheetDismissed) }
+                )
+            ) {
+                IfLetStore(
+                    store.scope(
+                        state: \.transactionState.editorState,
+                        action: \.transactionState.editor
+                    ),
+                    then: AddTransactionView.init(store:)
+                )
             }
         }
     }

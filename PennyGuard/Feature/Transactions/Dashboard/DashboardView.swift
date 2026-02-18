@@ -38,22 +38,6 @@ struct DashboardView: View {
                 .onAppear {
                     viewStore.send(.loadTransactions)
                 }
-
-                // Sheet for adding/editing transaction
-                .sheet(
-                    isPresented: viewStore.binding(
-                        get: \.isPresentingSheet,
-                        send: .sheetDismissed
-                    )
-                ) {
-                    IfLetStore(
-                        store.scope(
-                            state: \.editorState,
-                            action: \.editor
-                        ),
-                        then: AddTransactionView.init(store:)
-                    )
-                }
             }
         }
     }
