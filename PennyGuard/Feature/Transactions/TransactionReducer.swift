@@ -194,7 +194,7 @@ struct TransactionReducer: Reducer {
             case let .deleteSuccess(id):
                 // ✅ Remove by ID instead of index
                 state.transactions.removeAll { $0.id == id }
-                return .none
+                return .send(.loadTransactions) // Reload data after delete
             case let .deleteFailed(message):
                 state.errorMessage = message
                 return .none

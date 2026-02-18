@@ -33,11 +33,6 @@ struct DashboardView: View {
                 
                 // Toolbar with time frame picker and add button
                 .toolbar { toolbarContent(viewStore) }
-
-                // Load transactions when view appears
-                .onAppear {
-                    viewStore.send(.loadTransactions)
-                }
             }
         }
     }

@@ -43,11 +43,6 @@ struct TransactionListView: View {
                         }
                     }
                 }
-                
-                // MARK: - Load Data on Appear
-                .onAppear {
-                    viewStore.send(.loadTransactions)
-                }
             }
         }
     }

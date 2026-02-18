@@ -64,6 +64,10 @@ struct AppTabView: View {
                     then: AddTransactionView.init(store:)
                 )
             }
+            // MARK: - Load data once when tabs first appear
+            .onAppear {
+                viewStore.send(.transactionState(.loadTransactions))
+            }
         }
     }
 }
