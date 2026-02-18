@@ -15,17 +15,15 @@ struct AppReducer: Reducer {
 
     struct State {
         var selectedTab: Tab = .dashboard
-        var dashboard = TransactionReducer.State()     // State for the Dashboard tab
-        var transactions = TransactionReducer.State()  // State for the Transactions tab
+        var transactionState = TransactionReducer.State()  // Shared state for both tabs
     }
 
     // MARK: - Action
 
     @CasePathable
     enum Action {
-        case dashboard(TransactionReducer.Action)      // Forward action to Dashboard reducer
-        case transactions(TransactionReducer.Action)   // Forward action to Transactions reducer
-        case selectTab(Tab)                            // Tab selection action
+        case transactionState(TransactionReducer.Action)  // Forward action to shared TransactionReducer
+        case selectTab(Tab)                               // Tab selection action
     }
 
     // MARK: - Tab Enum
@@ -39,13 +37,8 @@ struct AppReducer: Reducer {
 
     var body: some ReducerOf<Self> {
         
-        // Scope Dashboard state and actions to TransactionReducer
-        Scope(state: \.dashboard, action: \.dashboard) {
-            TransactionReducer()
-        }
-
-        // Scope Transactions state and actions to TransactionReducer
-        Scope(state: \.transactions, action: \.transactions) {
+        // Scope shared transaction state and actions to TransactionReducer
+        Scope(state: \.transactionState, action: \.transactionState) {
             TransactionReducer()
         }
 
@@ -56,8 +49,8 @@ struct AppReducer: Reducer {
             case .selectTab(let tab):
                 state.selectedTab = tab
                 return .none
-            case .dashboard, .transactions:
-                return .none // Forwarded actions handled in respective scoped reducers
+            case .transactionState:
+                return .none // Forwarded actions handled in scoped reducer
             }
         }
     }

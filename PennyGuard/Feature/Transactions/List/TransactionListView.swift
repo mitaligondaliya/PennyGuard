@@ -100,7 +100,7 @@ struct TransactionListView: View {
     // MARK: - Swipe Actions (Delete & Edit)
     @ViewBuilder
     private func swipeActions(for transaction: Transaction, viewStore: ViewStoreOf<TransactionReducer>) -> some View {
-        if let index = viewStore.transactions.firstIndex(where: { $0.id == transaction.id }) {
+        if let index = viewStore.filteredTransactions.firstIndex(where: { $0.id == transaction.id }) {
             Button(role: .destructive) {
                 viewStore.send(.delete(IndexSet(integer: index)))
             } label: {

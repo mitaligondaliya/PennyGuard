@@ -36,28 +36,18 @@ struct DatabaseClient {
 extension DatabaseClient: DependencyKey {
     public static let liveValue = Self(
         fetchAll: {
-            do {
-                // Access the SwiftData context and fetch all transactions sorted by date
-                @Dependency(\.databaseService.context) var context
-                let transactionContext = try context()
-                
-                let descriptor = FetchDescriptor<Transaction>(sortBy: [SortDescriptor(\.date)])
-                return try transactionContext.fetch(descriptor)
-            } catch {
-                print("Failed to fetch transactions: \(error)")
-                return []
-            }
+            // Access the SwiftData context and fetch all transactions sorted by date
+            @Dependency(\.databaseService.context) var context
+            let transactionContext = try context()
+            
+            let descriptor = FetchDescriptor<Transaction>(sortBy: [SortDescriptor(\.date)])
+            return try transactionContext.fetch(descriptor)
         },
         fetch: { descriptor in
-            do {
-                // Fetch using a provided FetchDescriptor
-                @Dependency(\.databaseService.context) var context
-                let transactionContext = try context()
-                return try transactionContext.fetch(descriptor)
-            } catch {
-                print("Failed to fetch transactions: \(error)")
-                return []
-            }
+            // Fetch using a provided FetchDescriptor
+            @Dependency(\.databaseService.context) var context
+            let transactionContext = try context()
+            return try transactionContext.fetch(descriptor)
         },
         add: { model in
             do {

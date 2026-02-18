@@ -125,6 +125,22 @@ struct AddTransactionView: View {
                         .disabled(viewStore.title.isEmpty || viewStore.amount <= 0) // Disable save if title or amount is invalid
                     }
                 }
+                
+                // MARK: - Error Alert
+                .alert(
+                    "Save Error",
+                    isPresented: Binding(
+                        get: { viewStore.errorMessage != nil },
+                        set: { if !$0 { viewStore.send(.saveFailed("")) } }
+                    ),
+                    presenting: viewStore.errorMessage
+                ) { _ in
+                    Button("OK") {
+                        viewStore.send(.saveFailed(""))
+                    }
+                } message: { errorMessage in
+                    Text(errorMessage)
+                }
             }
         }
     }

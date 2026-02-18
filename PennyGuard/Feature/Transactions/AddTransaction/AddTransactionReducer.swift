@@ -24,6 +24,7 @@ struct AddTransactionReducer: Reducer {
         var notes: String = ""
         var type: TransactionType = .income
         var selectedCategory: CategoryType = .salary
+        var errorMessage: String? // Error message for failed saves
         
         var isEditing: Bool { transaction != nil } // Whether editing an existing transaction
         
@@ -52,6 +53,7 @@ struct AddTransactionReducer: Reducer {
         case cancelTapped
         case saveTapped
         case saveCompleted
+        case saveFailed(String)
     }
     
     // MARK: - Dependencies
@@ -117,11 +119,15 @@ struct AddTransactionReducer: Reducer {
                         await send(.saveCompleted)
                     } catch {
                         print("❌ Failed to save transaction: \(error)")
-                        // You could also send a `.saveFailed(error.localizedDescription)` here if needed
+                        await send(.saveFailed("Failed to save transaction: \(error.localizedDescription)"))
                     }
                 }
             case .saveCompleted, .cancelTapped:
                 return .none // No action needed for cancel or save completion
+                
+            case let .saveFailed(errorMessage):
+                state.errorMessage = errorMessage
+                return .none
             }
         }
     }

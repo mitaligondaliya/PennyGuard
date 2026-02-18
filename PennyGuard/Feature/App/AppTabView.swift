@@ -24,8 +24,8 @@ struct AppTabView: View {
                 // MARK: - Dashboard Tab
                 DashboardView(
                     store: store.scope(
-                        state: \.dashboard,     // Scope to dashboard state
-                        action: \.dashboard     // Scope to dashboard actions
+                        state: \.transactionState,     // Scope to shared transaction state
+                        action: \.transactionState     // Scope to shared transaction actions
                     )
                 )
                 .tabItem {
@@ -36,8 +36,8 @@ struct AppTabView: View {
                 // MARK: - Transactions Tab
                 TransactionListView(
                     store: store.scope(
-                        state: \.transactions,  // Scope to transactions state
-                        action: \.transactions  // Scope to transactions actions
+                        state: \.transactionState,     // Scope to shared transaction state
+                        action: \.transactionState     // Scope to shared transaction actions
                     )
                 )
                 .tabItem {
