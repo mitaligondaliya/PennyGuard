@@ -130,13 +130,13 @@ struct DashboardView: View {
 
             Divider()
 
-            if !viewStore.filteredTransactions.isEmpty {
-                ForEach(viewStore.filteredTransactions.prefix(5)) { transaction in
+            if !viewStore.displayTransactions.isEmpty {
+                ForEach(viewStore.displayTransactions.prefix(5)) { transaction in
                     // Transaction row
                     TransactionRow(transaction: transaction)
 
                     // Divider between rows except the last one
-                    if transaction.id != viewStore.filteredTransactions.prefix(5).last?.id {
+                    if transaction.id != viewStore.displayTransactions.prefix(5).last?.id {
                         Divider()
                     }
                 }

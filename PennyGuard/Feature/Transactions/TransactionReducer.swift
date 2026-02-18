@@ -61,22 +61,14 @@ struct TransactionReducer: Reducer {
             totalIncome - totalExpense
         }
         
-        // Filtered & sorted list of transactions
-        var filteredTransactions: [Transaction] {
+        // Transactions filtered by date and sorted (no search filter) - used by Dashboard
+        var displayTransactions: [Transaction] {
             var filtered = transactions
             let startDate = timeFrame.startDate
             
             // Filter by date
             if let startDate {
                 filtered = filtered.filter { $0.date >= startDate }
-            }
-            
-            // Filter by search text
-            if !searchString.isEmpty {
-                filtered = filtered.filter {
-                    $0.title.localizedCaseInsensitiveContains(searchString) ||
-                    $0.category.displayName.localizedCaseInsensitiveContains(searchString)
-                }
             }
             
             // Apply sorting
@@ -90,10 +82,25 @@ struct TransactionReducer: Reducer {
             }
         }
         
-        // Expense totals grouped by category
+        // Filtered & sorted list of transactions (includes search) - used by TransactionListView
+        var filteredTransactions: [Transaction] {
+            var filtered = displayTransactions
+            
+            // Filter by search text
+            if !searchString.isEmpty {
+                filtered = filtered.filter {
+                    $0.title.localizedCaseInsensitiveContains(searchString) ||
+                    $0.category.displayName.localizedCaseInsensitiveContains(searchString)
+                }
+            }
+            
+            return filtered
+        }
+        
+        // Expense totals grouped by category (based on display transactions without search)
         var expensesByCategory: [CategoryType: Double] {
             var result: [CategoryType: Double] = [:]
-            for transaction in filteredTransactions where transaction.type == .expense {
+            for transaction in displayTransactions where transaction.type == .expense {
                 result[transaction.category, default: 0] += transaction.amount
             }
             return result
