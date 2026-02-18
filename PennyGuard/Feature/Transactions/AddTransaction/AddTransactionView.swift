@@ -122,7 +122,12 @@ struct AddTransactionView: View {
                         Button("Save") {
                             viewStore.send(.saveTapped)  // Save transaction on tap
                         }
-                        .disabled(viewStore.title.isEmpty || viewStore.amount <= 0) // Disable save if title or amount is invalid
+                        // ✅ Disable if title empty, amount <= 0, OR category doesn't match type
+                        .disabled(
+                            viewStore.title.trimmingCharacters(in: .whitespaces).isEmpty ||
+                            viewStore.amount <= 0 ||
+                            viewStore.selectedCategory.type != viewStore.type
+                        )
                     }
                 }
                 

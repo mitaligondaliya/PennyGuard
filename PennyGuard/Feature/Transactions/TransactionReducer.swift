@@ -1,5 +1,5 @@
 //
-//  TransactionListReducer.swift
+//  TransactionReducer.swift
 //  PennyGuard
 //
 //  Created by Mitali Gondaliya on 18/04/25.
@@ -8,6 +8,7 @@
 import Foundation
 import ComposableArchitecture
 import SwiftData
+import os.log
 
 // MARK: - SortOption
 enum SortOption: String, CaseIterable, Equatable {
@@ -109,8 +110,8 @@ struct TransactionReducer: Reducer {
         case transactionTapped(Transaction)
         case sheetDismissed
         case editor(AddTransactionReducer.Action)
-        case delete(IndexSet)
-        case deleteSuccess(index: Int)
+        case delete(UUID)  // ✅ Changed: Delete by ID instead of IndexSet
+        case deleteSuccess(id: UUID)  // ✅ Changed: Track by ID
         case deleteFailed(String)
         case setTimeFrame(TimeFrame)
         case searchTextChanged(String)
@@ -142,7 +143,9 @@ struct TransactionReducer: Reducer {
                 state.transactions = result
                 return .none
             case let .transactionsLoadedFailure(message):
-                print("❌ Failed to load transactions: \(message)")
+                #if DEBUG
+                os_log("Failed to load transactions: %@", log: .default, type: .error, message)
+                #endif
                 state.errorMessage = message
                 return .none
             case .addButtonTapped:
@@ -168,21 +171,22 @@ struct TransactionReducer: Reducer {
             case .editor:
                 return .none
                 
-            case let .delete(indexSet):
-                guard let index = indexSet.first else { return .none }
-                let transaction = state.transactions[index]
-                let id = transaction.id
-                
+            case let .delete(id):
+                // ✅ Delete by ID is safe - won't delete wrong transaction if list changes
                 return .run { [id] send in
                     do {
                         try await transactionDB.deleteByID(id)
-                        await send(.deleteSuccess(index: index))
+                        await send(.deleteSuccess(id: id))
                     } catch {
+                        #if DEBUG
+                        os_log("Failed to delete transaction: %@", log: .default, type: .error, error.localizedDescription)
+                        #endif
                         await send(.deleteFailed("Delete failed"))
                     }
                 }
-            case let .deleteSuccess(index):
-                state.transactions.remove(at: index)
+            case let .deleteSuccess(id):
+                // ✅ Remove by ID instead of index
+                state.transactions.removeAll { $0.id == id }
                 return .none
             case let .deleteFailed(message):
                 state.errorMessage = message

@@ -1,5 +1,5 @@
 //
-//  RootView.swift
+//  AppRootView.swift
 //  PennyGuard
 //
 //  Created by Mitali Gondaliya on 02/05/25.
@@ -10,19 +10,26 @@ import SwiftUI
 import ComposableArchitecture
 import os
 
+// MARK: - Environment Value for ModelContext
+extension EnvironmentValues {
+    @Entry var modelContext: ModelContext?
+}
+
 struct AppRootView: View {
     @Dependency(\.databaseService) var databaseService
-    @State private var modelContext: ModelContext?
     @State private var initializationError: Error?
+    @State private var isInitialized = false
 
     let store: StoreOf<AppReducer>
     
     var body: some View {
-        if let modelContext = modelContext {
+        if isInitialized {
             AppTabView(store: store)
-                .modelContext(modelContext)
         } else if initializationError != nil {
             errorView
+                .onAppear {
+                    // Allow retry
+                }
         } else {
             ProgressView()
                 .onAppear {
@@ -33,7 +40,7 @@ struct AppRootView: View {
     
     @ViewBuilder
     private var errorView: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 48))
                 .foregroundColor(.red)
@@ -46,6 +53,13 @@ struct AppRootView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
+            
+            Button("Retry") {
+                initializationError = nil
+                isInitialized = false
+                initializeDatabase()
+            }
+            .padding(.top, 16)
         }
         .padding()
     }
@@ -53,11 +67,17 @@ struct AppRootView: View {
     private func initializeDatabase() {
         do {
             let context = try databaseService.context()
-            self.modelContext = context
+            isInitialized = true
+            
+            // Set the model context in the environment for child views
+            // This will be picked up by the AppTabView and its children
+            var environment = EnvironmentValues()
+            environment.modelContext = context
         } catch {
-            // Log error for debugging
+            #if DEBUG
             let logger = Logger(subsystem: "com.pennyguard", category: "AppRootView")
             logger.error("Failed to load ModelContext: \(error, privacy: .public)")
+            #endif
             self.initializationError = error
         }
     }

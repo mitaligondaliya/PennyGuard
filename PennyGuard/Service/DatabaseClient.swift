@@ -1,5 +1,5 @@
 //
-//  Transactiondatabase.swift
+//  DatabaseClient.swift
 //  PennyGuard
 //
 //  Created by Mitali Gondaliya on 25/04/25.
@@ -7,6 +7,12 @@
 import ComposableArchitecture
 import SwiftData
 import Foundation
+import os.log
+
+// MARK: - Logging Configuration
+extension OSLog {
+    static let database = OSLog(subsystem: "com.pennyguard.app", category: "Database")
+}
 
 // MARK: - Dependency Injection Key for SwiftData-based Transaction Database
 extension DependencyValues {
@@ -16,19 +22,43 @@ extension DependencyValues {
     }
 }
 
+// MARK: - Transaction Update Configuration
+struct TransactionUpdate {
+    let title: String
+    let amount: Double
+    let date: Date
+    let notes: String?
+    let category: CategoryType
+    let type: TransactionType
+}
+
 // MARK: - TransactionDatabase Interface
 struct DatabaseClient {
     var fetchAll: () async throws -> [Transaction]       // Fetch all transactions
     var fetch: (FetchDescriptor<Transaction>) async throws -> [Transaction] // Fetch with a descriptor
     var add: (Transaction) async throws -> Void           // Add a transaction
     var deleteByID: (UUID) async throws -> Void  // Delete a transaction by ID
-    var update: (Transaction) async throws -> Void  // Save changes to the database
+    var update: (UUID, TransactionUpdate) async throws -> Void  // Update transaction with new values
     
     // MARK: - Transaction Errors
     enum TransactionError: Error {
         case add
         case delete
         case update
+        case fetchFailed
+        
+        var localizedDescription: String {
+            switch self {
+            case .add:
+                return "Failed to add transaction"
+            case .delete:
+                return "Failed to delete transaction"
+            case .update:
+                return "Failed to update transaction"
+            case .fetchFailed:
+                return "Failed to fetch transaction"
+            }
+        }
     }
 }
 
@@ -57,29 +87,54 @@ extension DatabaseClient: DependencyKey {
                 transactionContext.insert(model)
                 try transactionContext.save()  // Ensure save is called after adding
             } catch {
-                print("Failed to add transactions: \(error)")
+                #if DEBUG
+                os_log("Failed to add transaction: %@", log: .database, type: .error, error.localizedDescription)
+                #endif
                 throw TransactionError.add
             }
         },
         deleteByID: { id in
-            @Dependency(\.databaseService.context) var context
-            let descriptor = FetchDescriptor<Transaction>(predicate: #Predicate { $0.id == id })
-            if let transaction = try context().fetch(descriptor).first {
-                let transactionContext = try context()
-                transactionContext.delete(transaction)
-                try transactionContext.save()
-            } else {
-                throw TransactionError.delete
+            do {
+                @Dependency(\.databaseService.context) var context
+                let transactionContext = try context()  // Single context call
+                let descriptor = FetchDescriptor<Transaction>(predicate: #Predicate { $0.id == id })
+                if let transaction = try transactionContext.fetch(descriptor).first {
+                    transactionContext.delete(transaction)
+                    try transactionContext.save()
+                } else {
+                    throw TransactionError.delete
+                }
+            } catch {
+                #if DEBUG
+                os_log("Failed to delete transaction: %@", log: .database, type: .error, error.localizedDescription)
+                #endif
+                throw error is TransactionError ? error : TransactionError.delete
             }
         },
-        update: { _ in
+        update: { id, updateData in
             do {
-                // Save changes to the context
+                // Fetch and update the transaction in a single context operation
                 @Dependency(\.databaseService.context) var context
                 let transactionContext = try context()
-                try transactionContext.save()
+                
+                let descriptor = FetchDescriptor<Transaction>(predicate: #Predicate { $0.id == id })
+                if let transaction = try transactionContext.fetch(descriptor).first {
+                    // Update the transaction's properties in-place
+                    transaction.title = updateData.title
+                    transaction.amount = updateData.amount
+                    transaction.date = updateData.date
+                    transaction.notes = updateData.notes
+                    transaction.category = updateData.category
+                    transaction.type = updateData.type
+                    // SwiftData automatically tracks changes to @Model objects
+                    try transactionContext.save()
+                } else {
+                    throw TransactionError.fetchFailed
+                }
             } catch {
-                print("Failed to update transaction: \(error)")
+                #if DEBUG
+                os_log("Failed to update transaction: %@", log: .database, type: .error, error.localizedDescription)
+                #endif
                 throw TransactionError.update
             }
         }
@@ -91,11 +146,11 @@ extension DatabaseClient: TestDependencyKey {
     public static var previewValue = Self.noop
     
     public static let testValue = Self(
-        fetchAll: unimplemented("\(Self.self).fetchAll"),
-        fetch: unimplemented("\(Self.self).fetchDescriptor"),
-        add: unimplemented("\(Self.self).Add"),
-        deleteByID: unimplemented("\(Self.self).delete"),
-        update: unimplemented("\(Self.self).update")
+        fetchAll: { [] },
+        fetch: { _ in [] },
+        add: { _ in },
+        deleteByID: { _ in },
+        update: { _, _ in }
     )
     
     /// No-op mock version used for previews
@@ -104,6 +159,6 @@ extension DatabaseClient: TestDependencyKey {
         fetch: { _ in [] },
         add: { _ in },
         deleteByID: { _ in },
-        update: { _ in }
+        update: { _, _ in }
     )
  }

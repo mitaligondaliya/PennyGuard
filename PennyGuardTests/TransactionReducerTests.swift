@@ -72,89 +72,89 @@
         }
     }
     
-    @Test
-    func testDeleteTransaction() async throws {
-        // MARK: - Arrange
-        let transactionID = UUID()
-        var deletedID: UUID?
-        
-        let transaction = Transaction(
-            id: transactionID,
-            title: "Sample",
-            amount: 20,
-            date: .now,
-            notes: "Test",
-            category: .food,
-            type: .expense
-        )
-        
-        var testDB = DatabaseClient.testValue
-        testDB.deleteByID = { id in
-            deletedID = id
-        }
-        
-        // MARK: - Setup Store
-        let store = await TestStore(
-            initialState: TransactionReducer.State(
-                transactions: [transaction],
-                errorMessage: ""
-            )
-        ) {
-            TransactionReducer()
-        } withDependencies: {
-            $0.swiftData = testDB
-        }
-        
-        // MARK: - Act
-        await store.send(.delete(IndexSet(integer: 0)))
-        
-        // MARK: - Assert
-        await store.receive(.deleteSuccess(index: 0)) {
-            $0.transactions = []
-        }
-        
-        #expect(deletedID == transactionID)
-    }
+     @Test
+     func testDeleteTransaction() async throws {
+         // MARK: - Arrange
+         let transactionID = UUID()
+         var deletedID: UUID?
+         
+         let transaction = Transaction(
+             id: transactionID,
+             title: "Sample",
+             amount: 20,
+             date: .now,
+             notes: "Test",
+             category: .food,
+             type: .expense
+         )
+         
+         var testDB = DatabaseClient.testValue
+         testDB.deleteByID = { id in
+             deletedID = id
+         }
+         
+         // MARK: - Setup Store
+         let store = await TestStore(
+             initialState: TransactionReducer.State(
+                 transactions: [transaction],
+                 errorMessage: ""
+             )
+         ) {
+             TransactionReducer()
+         } withDependencies: {
+             $0.swiftData = testDB
+         }
+         
+         // MARK: - Act
+         await store.send(.delete(transactionID))  // ✅ Changed: Pass ID directly
+         
+         // MARK: - Assert
+         await store.receive(.deleteSuccess(id: transactionID)) {  // ✅ Changed: Track by ID
+             $0.transactions = []
+         }
+         
+         #expect(deletedID == transactionID)
+     }
     
-    @Test
-    func testDeleteTransactionFailure() async throws {
-        // MARK: - Arrange
-        let transactionID = UUID()
-        let errorMessage = "Delete failed"
-        
-        let transaction = Transaction(
-            id: transactionID,
-            title: "Sample",
-            amount: 20,
-            date: .now,
-            notes: "Test",
-            category: .food,
-            type: .expense
-        )
-        
-        var testDB = DatabaseClient.testValue
-        testDB.deleteByID = { _ in
-            throw NSError(domain: "Test", code: 1, userInfo: nil)
-        }
-        
-        // MARK: - Setup Store
-        let store = await TestStore(
-            initialState: TransactionReducer.State(
-                transactions: [transaction],
-                errorMessage: ""
-            )
-        ) {
-            TransactionReducer()
-        } withDependencies: {
-            $0.swiftData = testDB
-        }
-        
-        // MARK: - Act
-        await store.send(.delete(IndexSet(integer: 0)))
-        
-        // MARK: - Assert
-        await store.receive(.deleteFailed(errorMessage)) {
-            $0.errorMessage = errorMessage
-        }
-    }
+     @Test
+     func testDeleteTransactionFailure() async throws {
+         // MARK: - Arrange
+         let transactionID = UUID()
+         let errorMessage = "Delete failed"
+         
+         let transaction = Transaction(
+             id: transactionID,
+             title: "Sample",
+             amount: 20,
+             date: .now,
+             notes: "Test",
+             category: .food,
+             type: .expense
+         )
+         
+         var testDB = DatabaseClient.testValue
+         testDB.deleteByID = { _ in
+             throw NSError(domain: "Test", code: 1, userInfo: nil)
+         }
+         
+         // MARK: - Setup Store
+         let store = await TestStore(
+             initialState: TransactionReducer.State(
+                 transactions: [transaction],
+                 errorMessage: ""
+             )
+         ) {
+             TransactionReducer()
+         } withDependencies: {
+             $0.swiftData = testDB
+         }
+         
+         // MARK: - Act
+         await store.send(.delete(transactionID))  // ✅ Changed: Pass ID directly
+         
+         // MARK: - Assert
+         await store.receive(.deleteFailed(errorMessage)) {
+             $0.errorMessage = errorMessage
+         }
+     }
  }

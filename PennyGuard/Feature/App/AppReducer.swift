@@ -6,6 +6,12 @@
 //
 
 import ComposableArchitecture
+import os.log
+
+// MARK: - Logging Configuration
+extension OSLog {
+    static let appReducer = OSLog(subsystem: "com.pennyguard.app", category: "AppReducer")
+}
 
 // MARK: - AppReducer
 
@@ -44,7 +50,9 @@ struct AppReducer: Reducer {
 
         // Reducer handling tab selection and general app-level logic
         Reduce { state, action in
-            print("📬 AppReducer received action: \(action)")
+            #if DEBUG
+            os_log("AppReducer received action: %@", log: .appReducer, type: .debug, String(describing: action))
+            #endif
             switch action {
             case .selectTab(let tab):
                 state.selectedTab = tab

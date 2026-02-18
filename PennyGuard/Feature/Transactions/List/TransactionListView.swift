@@ -100,20 +100,18 @@ struct TransactionListView: View {
     // MARK: - Swipe Actions (Delete & Edit)
     @ViewBuilder
     private func swipeActions(for transaction: Transaction, viewStore: ViewStoreOf<TransactionReducer>) -> some View {
-        if let index = viewStore.filteredTransactions.firstIndex(where: { $0.id == transaction.id }) {
-            Button(role: .destructive) {
-                viewStore.send(.delete(IndexSet(integer: index)))
-            } label: {
-                Label("Delete", systemImage: "trash")
-            }
-
-            Button {
-                viewStore.send(.transactionTapped(transaction))
-            } label: {
-                Label("Edit", systemImage: "pencil")
-            }
-            .tint(.blue)
+        Button(role: .destructive) {
+            viewStore.send(.delete(transaction.id))  // ✅ Changed: Pass ID directly, not index
+        } label: {
+            Label("Delete", systemImage: "trash")
         }
+
+        Button {
+            viewStore.send(.transactionTapped(transaction))
+        } label: {
+            Label("Edit", systemImage: "pencil")
+        }
+        .tint(.blue)
     }
 }
 

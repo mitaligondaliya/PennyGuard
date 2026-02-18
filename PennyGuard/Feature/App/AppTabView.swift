@@ -1,5 +1,5 @@
 //
-//  RootView.swift
+//  AppTabView.swift
 //  PennyGuard
 //
 //  Created by Mitali Gondaliya on 18/04/25.
@@ -7,10 +7,12 @@
 
 import SwiftUI
 import ComposableArchitecture
+import SwiftData
 
 // MARK: - AppTabView
 
 struct AppTabView: View {
+    @Environment(\.modelContext) var modelContext
     let store: StoreOf<AppReducer>
 
     var body: some View {
@@ -28,6 +30,7 @@ struct AppTabView: View {
                         action: \.transactionState     // Scope to shared transaction actions
                     )
                 )
+                .environment(\.modelContext, modelContext)
                 .tabItem {
                     Label("Dashboard", systemImage: "chart.pie")
                 }
@@ -40,6 +43,7 @@ struct AppTabView: View {
                         action: \.transactionState     // Scope to shared transaction actions
                     )
                 )
+                .environment(\.modelContext, modelContext)
                 .tabItem {
                     Label("Transactions", systemImage: "list.bullet")
                 }
